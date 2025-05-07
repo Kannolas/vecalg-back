@@ -30,34 +30,37 @@ export class ArticleService {
   }
   async updateArticle(
     id: number,
-    updateArticleWithBlocksDto: CreateArticleWithBlocksDto,
+    title: string,
+    blocks: Prisma.BlockCreateInput[],
   ): Promise<Article> {
-    // 1. Удаляем старые blocks
-    await this.prisma.block.deleteMany({
-      where: { articleId: id },
-    });
+    // Проверка на наличие блоков
+    if (!blocks || blocks.length === 0) {
+      throw new Error('Blocks cannot be empty');
+    }
 
-    // 2. Создаем новые blocks
-    const createBlocks = updateArticleWithBlocksDto.blocks.map((block) => ({
-      articleId: id,
-      type: block.type,
-      title: block.title,
-      content: block.content,
-      svgData: block.svgData,
-    }));
-
-    // 3. Обновляем article + создаем новые blocks через nested createMany
+    // Обновление статьи и блоков
     return this.prisma.article.update({
       where: { id },
       data: {
-        title: updateArticleWithBlocksDto.title,
+        title, // Обновляем только title
         blocks: {
+          // Удаляем старые блоки, если они есть
+          deleteMany: {
+            articleId: id,
+          },
+          // Создаём новые блоки
           createMany: {
-            data: createBlocks,
+            data: blocks.map((block) => ({
+              type: block.type,
+              content: block.content,
+              svgData: block.svgData,
+              title: block.title,
+              articleId: id, // связываем с текущей статьёй
+            })),
           },
         },
       },
-      include: { blocks: true }, // вернуть blocks вместе с article
+      include: { blocks: true }, // Чтобы вернуть обновлённые блоки
     });
   }
 

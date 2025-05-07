@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 // src/article/article.controller.ts
 import {
   Controller,
@@ -7,9 +8,11 @@ import {
   Patch,
   Param,
   Delete,
+  BadRequestException,
 } from '@nestjs/common'; // <--- Добавляем импорт
 import { ArticleService } from './article.service';
 import { CreateArticleWithBlocksDto } from './dto/article.dto';
+import { Prisma } from '@prisma/client';
 
 @Controller('articles')
 export class ArticleController {
@@ -33,16 +36,22 @@ export class ArticleController {
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
-    updateArticleWithBlocksDto: CreateArticleWithBlocksDto,
+    @Body('title') title: string,
+    @Body('blocks') blocks: Prisma.BlockCreateInput[],
   ) {
-    return this.articleService.updateArticle(
-      parseInt(id),
-      updateArticleWithBlocksDto,
-    );
-  }
+    if (!blocks || blocks.length === 0) {
+      throw new BadRequestException('Blocks are required');
+    }
 
+    // Логирование для отладки
+    console.log('Received title:', title);
+    console.log('Received blocks:', blocks);
+
+    // Обновляем статью с блоками
+    return this.articleService.updateArticle(parseInt(id), title, blocks);
+  }
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.articleService.deleteArticle(parseInt(id));
