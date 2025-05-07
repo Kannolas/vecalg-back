@@ -33,8 +33,14 @@ export class ArticleController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body('title') title: string) {
-    return this.articleService.updateArticle(parseInt(id), title);
+  update(
+    @Param('id') id: string,
+    updateArticleWithBlocksDto: CreateArticleWithBlocksDto,
+  ) {
+    return this.articleService.updateArticle(
+      parseInt(id),
+      updateArticleWithBlocksDto,
+    );
   }
 
   @Delete(':id')

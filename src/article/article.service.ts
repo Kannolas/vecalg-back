@@ -28,11 +28,36 @@ export class ArticleService {
       data: { title },
     });
   }
+  async updateArticle(
+    id: number,
+    updateArticleWithBlocksDto: CreateArticleWithBlocksDto,
+  ): Promise<Article> {
+    // 1. Удаляем старые blocks
+    await this.prisma.block.deleteMany({
+      where: { articleId: id },
+    });
 
-  async updateArticle(id: number, title: string): Promise<Article> {
+    // 2. Создаем новые blocks
+    const createBlocks = updateArticleWithBlocksDto.blocks.map((block) => ({
+      articleId: id,
+      type: block.type,
+      title: block.title,
+      content: block.content,
+      svgData: block.svgData,
+    }));
+
+    // 3. Обновляем article + создаем новые blocks через nested createMany
     return this.prisma.article.update({
       where: { id },
-      data: { title },
+      data: {
+        title: updateArticleWithBlocksDto.title,
+        blocks: {
+          createMany: {
+            data: createBlocks,
+          },
+        },
+      },
+      include: { blocks: true }, // вернуть blocks вместе с article
     });
   }
 
