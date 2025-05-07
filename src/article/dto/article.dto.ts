@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-class CreateBlockDto {
+export class CreateBlockDto {
   @IsString() // BlockType теперь строка
   type: string;
 

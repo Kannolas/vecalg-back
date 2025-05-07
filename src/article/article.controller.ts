@@ -11,8 +11,7 @@ import {
   BadRequestException,
 } from '@nestjs/common'; // <--- Добавляем импорт
 import { ArticleService } from './article.service';
-import { CreateArticleWithBlocksDto } from './dto/article.dto';
-import { Prisma } from '@prisma/client';
+import { CreateArticleWithBlocksDto, CreateBlockDto } from './dto/article.dto';
 
 @Controller('articles')
 export class ArticleController {
@@ -39,7 +38,7 @@ export class ArticleController {
   async update(
     @Param('id') id: string,
     @Body('title') title: string,
-    @Body('blocks') blocks: Prisma.BlockCreateInput[],
+    @Body('blocks') blocks: CreateBlockDto[],
   ) {
     if (!blocks || blocks.length === 0) {
       throw new BadRequestException('Blocks are required');

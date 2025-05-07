@@ -7,7 +7,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Article } from '@prisma/client';
-import { CreateArticleWithBlocksDto } from './dto/article.dto';
+import { CreateArticleWithBlocksDto, CreateBlockDto } from './dto/article.dto';
 
 @Injectable()
 export class ArticleService {
@@ -31,7 +31,7 @@ export class ArticleService {
   async updateArticle(
     id: number,
     title: string,
-    blocks: Prisma.BlockCreateInput[],
+    blocks: CreateBlockDto[],
   ): Promise<Article> {
     // Проверка на наличие блоков
     if (!blocks || blocks.length === 0) {
